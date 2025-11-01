@@ -1,74 +1,11 @@
 <html>
 <head>
-    <title>MindAR - Componentes de PC (Info Automática)</title>
+    <title>MindAR - Componentes de PC (Visualización Simple)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script> 
-
-    <script>
-        // =================================================================
-        // NUEVO COMPONENTE: Muestra la información automáticamente al aparecer el modelo
-        // =================================================================
-        AFRAME.registerComponent('info-auto', {
-            schema: {
-                info: {type: 'string', default: 'Información no disponible.'}
-            },
-            init: function () {
-                var modelEl = this.el; // La entidad del modelo 3D
-                var infoText = this.data.info;
-                var targetEl = modelEl.closest('a-entity[mindar-image-target]'); // El marcador padre
-
-                if (!targetEl) return;
-
-                // Función para crear y mostrar el texto
-                const displayInfo = () => {
-                    // 1. Eliminar texto anterior
-                    var oldText = document.getElementById('infoTextAR');
-                    if (oldText) {
-                        oldText.parentNode.removeChild(oldText);
-                    }
-
-                    // 2. Crear la nueva entidad de texto
-                    var textEntity = document.createElement('a-entity');
-                    
-                    textEntity.setAttribute('id', 'infoTextAR');
-                    textEntity.setAttribute('text', {
-                        value: infoText,
-                        color: '#FFFFFF', 
-                        wrapCount: 25, 
-                        width: 1.2,
-                        align: 'center'
-                    });
-                    
-                    // Posicionamos el texto sobre el centro del marcador (Posición 0, 0.6, 0.1 del target)
-                    textEntity.setAttribute('position', '0 0.6 0.1'); 
-                    
-                    // Hace que el texto mire siempre a la cámara
-                    textEntity.setAttribute('look-at', '[camera]');
-
-                    // 3. Adjuntar el texto al Target
-                    targetEl.appendChild(textEntity);
-                };
-                
-                // Función para ocultar el texto
-                const hideInfo = () => {
-                    var currentText = document.getElementById('infoTextAR');
-                    if (currentText) {
-                        currentText.parentNode.removeChild(currentText);
-                    }
-                };
-                
-
-                // 4. ESCUCHAMOS EL EVENTO CUANDO EL MARKER ES ENCONTRADO
-                targetEl.addEventListener('targetFound', displayInfo);
-                
-                // 5. ESCUCHAMOS EL EVENTO CUANDO EL MARKER SE PIERDE
-                targetEl.addEventListener('targetLost', hideInfo);
-            }
-        });
-    </script>
 </head>
 <body>
 
@@ -93,8 +30,8 @@
                 rotation="90 0 0"             
                 position="0 0 0.1"            
                 scale="0.2 0.2 0.2"  
-                animation-mixer
-                info-auto="info: La GPU (Tarjeta Gráfica) es el motor de renderizado. Se encarga de procesar y mostrar imágenes, vídeos y gráficos 3D."> </a-entity>
+                animation-mixer>
+            </a-entity>
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 1">
@@ -103,8 +40,8 @@
                 rotation="0 0 0"             
                 position="0 0 0.1"            
                 scale="0.2 0.2 0.2"  
-                animation-mixer
-                info-auto="info: La RAM (Memoria de Acceso Aleatorio) es la memoria de trabajo ultrarrápida que usa el CPU para ejecutar los programas que están abiertos."> </a-entity>
+                animation-mixer>
+            </a-entity>
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 2">
@@ -112,10 +49,11 @@
                 gltf-model="#cpu-modelo" 
                 rotation="0 0 0"             
                 position="0 0 0.1"            
-                scale="0.2 0.2 0.2"  
-                animation-mixer
-                info-auto="info: El CPU (Procesador) es el cerebro de la computadora. Ejecuta todas las instrucciones de los programas, gestiona las operaciones y el flujo de datos."> </a-entity>
+                scale="0.4 0.4 0.4"  
+                animation-mixer>
+            </a-entity>
         </a-entity>
+        
     </a-scene>
 </body>
 </html>
