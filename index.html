@@ -8,20 +8,14 @@
 </head>
 <body>
 
-    <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 1" 
+    <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 1; debug: true;" 
              color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
              vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            
-            <a-sphere color="#FF0000" 
-                      radius="0.2" 
-                      position="0 0 0.2" 
-                      animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear;">
-            </a-sphere>
-            
+            <a-sphere color="#FF0000" radius="0.2" position="0 0 0.2" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear;"></a-sphere>
         </a-entity>
     </a-scene>
 </body>
