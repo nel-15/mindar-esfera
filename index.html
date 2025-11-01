@@ -1,16 +1,82 @@
 <html>
 <head>
-    <title>Mi Primer MindAR</title>
+    <title>MindAR - Componentes de PC Interactivos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.1/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.2.0/dist/aframe-extras.min.js"></script> 
+
+    <script>
+        // =================================================================
+        // COMPONENTE PERSONALIZADO: Muestra la información al hacer clic
+        // =================================================================
+        AFRAME.registerComponent('info-componente', {
+            schema: {
+                info: {type: 'string', default: 'Información no disponible.'}
+            },
+            init: function () {
+                var el = this.el;
+                var infoText = this.data.info;
+
+                el.addEventListener('click', function (evt) {
+                    
+                    // 1. Obtener el punto 3D donde se hizo clic
+                    var clickPoint = evt.detail.intersection.point;
+                    
+                    // 2. Eliminar el texto anterior si existe
+                    var oldText = document.getElementById('infoTextAR');
+                    if (oldText) {
+                        oldText.parentNode.removeChild(oldText);
+                    }
+
+                    // 3. Crear la nueva entidad de texto
+                    var textEntity = document.createElement('a-entity');
+                    
+                    textEntity.setAttribute('id', 'infoTextAR');
+                    textEntity.setAttribute('text', {
+                        value: infoText,
+                        color: '#FFFFFF', 
+                        wrapCount: 25, 
+                        width: 1.2,
+                        align: 'center'
+                    });
+                    
+                    // Posicionar el texto
+                    textEntity.setAttribute('position', `${clickPoint.x} ${clickPoint.y + 0.3} ${clickPoint.z}`);
+                    
+                    // Hace que el texto mire siempre a la cámara
+                    textEntity.setAttribute('look-at', '[camera]');
+
+                    // 4. Adjuntar el texto al Target de MindAR actual
+                    var currentTarget = el.closest('a-entity[mindar-image-target]');
+                    if (currentTarget) {
+                        currentTarget.appendChild(textEntity);
+                        
+                        // 5. Eliminar el texto automáticamente después de 5 segundos
+                        setTimeout(function() {
+                            var currentText = document.getElementById('infoTextAR');
+                            if (currentText) {
+                                currentText.parentNode.removeChild(currentText);
+                            }
+                        }, 5000); 
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body>
 
-    <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 1; debug: true;" 
+    <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 3; debug: true;" 
              color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
              vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
+            <a-asset-item id="gpu-modelo" src="./assets/rx_480_gpu.glb"></a-asset-item>
+            <a-asset-item id="ram-modelo" src="./assets/kingston_hyperx_fury_black_ram_module.glb"></a-asset-item>
+            <a-asset-item id="cpu-modelo" src="./assets/am4_cpu__free.glb"></a-asset-item>
+        </a-assets>
 
         <a-camera 
             position="0 0 0" 
@@ -18,13 +84,38 @@
         </a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-sphere 
-                color="#FF0000" 
-                radius="0.2" 
-                position="0 0 0.2" 
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear;">
-            </a-sphere>
+            <a-entity 
+                gltf-model="#gpu-modelo" 
+                rotation="90 0 0"             
+                position="0 0 0.1"            
+                scale="0.05 0.05 0.05"  
+                animation-mixer
+                info-componente="info: La GPU (Tarjeta Gráfica) es el motor de renderizado. Se encarga de procesar y mostrar imágenes, vídeos y gráficos 3D.">
+            </a-entity>
         </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 1">
+            <a-entity 
+                gltf-model="#ram-modelo" 
+                rotation="0 0 0"             
+                position="0 0 0.1"            
+                scale="0.1 0.1 0.1"  
+                animation-mixer
+                info-componente="info: La RAM (Memoria de Acceso Aleatorio) es la memoria de trabajo ultrarrápida que usa el CPU para ejecutar los programas que están abiertos.">
+            </a-entity>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 2">
+            <a-entity 
+                gltf-model="#cpu-modelo" 
+                rotation="0 0 0"             
+                position="0 0 0.1"            
+                scale="0.1 0.1 0.1"  
+                animation-mixer
+                info-componente="info: El CPU (Procesador) es el cerebro de la computadora. Ejecuta todas las instrucciones de los programas, gestiona las operaciones y el flujo de datos.">
+            </a-entity>
+        </a-entity>
+
     </a-scene>
 </body>
 </html>
