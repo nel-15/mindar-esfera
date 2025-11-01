@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>MindAR - Componentes de PC Interactivos</title>
+    <title>MindAR - Componentes de PC (Info Automática)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -9,28 +9,28 @@
 
     <script>
         // =================================================================
-        // COMPONENTE PERSONALIZADO: Muestra la información al hacer clic
+        // NUEVO COMPONENTE: Muestra la información automáticamente al aparecer el modelo
         // =================================================================
-        AFRAME.registerComponent('info-componente', {
+        AFRAME.registerComponent('info-auto', {
             schema: {
                 info: {type: 'string', default: 'Información no disponible.'}
             },
             init: function () {
-                var el = this.el;
+                var modelEl = this.el; // La entidad del modelo 3D
                 var infoText = this.data.info;
+                var targetEl = modelEl.closest('a-entity[mindar-image-target]'); // El marcador padre
 
-                el.addEventListener('click', function (evt) {
-                    
-                    // 1. Obtener el punto 3D donde se hizo clic
-                    var clickPoint = evt.detail.intersection.point;
-                    
-                    // 2. Eliminar el texto anterior si existe
+                if (!targetEl) return;
+
+                // Función para crear y mostrar el texto
+                const displayInfo = () => {
+                    // 1. Eliminar texto anterior
                     var oldText = document.getElementById('infoTextAR');
                     if (oldText) {
                         oldText.parentNode.removeChild(oldText);
                     }
 
-                    // 3. Crear la nueva entidad de texto
+                    // 2. Crear la nueva entidad de texto
                     var textEntity = document.createElement('a-entity');
                     
                     textEntity.setAttribute('id', 'infoTextAR');
@@ -42,26 +42,30 @@
                         align: 'center'
                     });
                     
-                    // Posicionar el texto
-                    textEntity.setAttribute('position', `${clickPoint.x} ${clickPoint.y + 0.3} ${clickPoint.z}`);
+                    // Posicionamos el texto sobre el centro del marcador (Posición 0, 0.6, 0.1 del target)
+                    textEntity.setAttribute('position', '0 0.6 0.1'); 
                     
                     // Hace que el texto mire siempre a la cámara
                     textEntity.setAttribute('look-at', '[camera]');
 
-                    // 4. Adjuntar el texto al Target de MindAR actual
-                    var currentTarget = el.closest('a-entity[mindar-image-target]');
-                    if (currentTarget) {
-                        currentTarget.appendChild(textEntity);
-                        
-                        // 5. Eliminar el texto automáticamente después de 5 segundos
-                        setTimeout(function() {
-                            var currentText = document.getElementById('infoTextAR');
-                            if (currentText) {
-                                currentText.parentNode.removeChild(currentText);
-                            }
-                        }, 5000); 
+                    // 3. Adjuntar el texto al Target
+                    targetEl.appendChild(textEntity);
+                };
+                
+                // Función para ocultar el texto
+                const hideInfo = () => {
+                    var currentText = document.getElementById('infoTextAR');
+                    if (currentText) {
+                        currentText.parentNode.removeChild(currentText);
                     }
-                });
+                };
+                
+
+                // 4. ESCUCHAMOS EL EVENTO CUANDO EL MARKER ES ENCONTRADO
+                targetEl.addEventListener('targetFound', displayInfo);
+                
+                // 5. ESCUCHAMOS EL EVENTO CUANDO EL MARKER SE PIERDE
+                targetEl.addEventListener('targetLost', hideInfo);
             }
         });
     </script>
@@ -70,8 +74,9 @@
 
     <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 3; debug: true;" 
              color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true"
-             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false"
-             raycaster="objects: .clickable" cursor="rayOrigin: mouse; fuse: false"> <a-assets>
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
             <a-asset-item id="gpu-modelo" src="./assets/gpu_amd_rx_6700_xt.glb"></a-asset-item>
             <a-asset-item id="ram-modelo" src="./assets/kingston_hyperx_fury_black_ram_module.glb"></a-asset-item>
             <a-asset-item id="cpu-modelo" src="./assets/am4_cpu__free.glb"></a-asset-item>
@@ -79,9 +84,7 @@
 
         <a-camera 
             position="0 0 0" 
-            look-controls="enabled: false"
-            raycaster="objects: .clickable" 
-            cursor="rayOrigin: camera; fuse: false"> 
+            look-controls="enabled: false">
         </a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0">
@@ -91,9 +94,7 @@
                 position="0 0 0.1"            
                 scale="0.2 0.2 0.2"  
                 animation-mixer
-                class="clickable"  
-                info-componente="info: La GPU (Tarjeta Gráfica) es el motor de renderizado. Se encarga de procesar y mostrar imágenes, vídeos y gráficos 3D.">
-            </a-entity>
+                info-auto="info: La GPU (Tarjeta Gráfica) es el motor de renderizado. Se encarga de procesar y mostrar imágenes, vídeos y gráficos 3D."> </a-entity>
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 1">
@@ -103,9 +104,7 @@
                 position="0 0 0.1"            
                 scale="0.2 0.2 0.2"  
                 animation-mixer
-                class="clickable"  
-                info-componente="info: La RAM (Memoria de Acceso Aleatorio) es la memoria de trabajo ultrarrápida que usa el CPU para ejecutar los programas que están abiertos.">
-            </a-entity>
+                info-auto="info: La RAM (Memoria de Acceso Aleatorio) es la memoria de trabajo ultrarrápida que usa el CPU para ejecutar los programas que están abiertos."> </a-entity>
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 2">
@@ -113,11 +112,9 @@
                 gltf-model="#cpu-modelo" 
                 rotation="0 0 0"             
                 position="0 0 0.1"            
-                scale="1.0 1.0 1.0"  
+                scale="0.2 0.2 0.2"  
                 animation-mixer
-                class="clickable"  
-                info-componente="info: El CPU (Procesador) es el cerebro de la computadora. Ejecuta todas las instrucciones de los programas, gestiona las operaciones y el flujo de datos.">
-            </a-entity>
+                info-auto="info: El CPU (Procesador) es el cerebro de la computadora. Ejecuta todas las instrucciones de los programas, gestiona las operaciones y el flujo de datos."> </a-entity>
         </a-entity>
     </a-scene>
 </body>
